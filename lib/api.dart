@@ -6,6 +6,7 @@ import 'package:search_x/search_result_model.dart';
 class Api {
   /// 请求搜索结果
   static Future<SearchResultModel?> requestSearchResult(String searchKey, int startIndex) {
+    print("requestSearchResult | searchKey: $searchKey startIndex: $startIndex");
     return Future<SearchResultModel>(() async {
       String result = "";
       try {

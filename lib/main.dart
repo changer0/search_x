@@ -44,7 +44,7 @@ class _HomePageState extends State<HomePage> {
 
   FocusNode focusNode = FocusNode();
 
-  int startIndex = 1;
+  int startIndex = 0;
 
   bool _isLoadMore = false;
 
@@ -170,11 +170,12 @@ class _HomePageState extends State<HomePage> {
     String searchKey = searchTextController.text;
     focusNode.unfocus();
     ToastUtils.showToast("正在搜索, 请稍候...");
+    startIndex = 0;
     if (searchKey.isEmpty) {
       ToastUtils.showToast("请输入搜索关键字");
     } else {
       this.searchKey = searchKey;
-      Api.requestSearchResult(searchKey, 1).then((value) {
+      Api.requestSearchResult(searchKey, startIndex).then((value) {
         print(
             "数据回调: ${value?.timeConsuming} size: ${value?.itemList.length}");
         setState(() {
@@ -199,7 +200,7 @@ class _HomePageState extends State<HomePage> {
     }
     _isLoadMore = true;
     this.searchKey = searchKey;
-    startIndex++;
+    startIndex = getItemListSize() + 1;
     Api.requestSearchResult(searchKey, startIndex).then((value) {
       _isLoadMore = false;
       print("数据回调: ${value?.timeConsuming} size: ${value?.itemList.length}");
