@@ -44,6 +44,10 @@ class _HomePageState extends State<HomePage> {
 
   FocusNode focusNode = FocusNode();
 
+  int startIndex = 1;
+
+  bool _isLoadMore = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,7 +72,7 @@ class _HomePageState extends State<HomePage> {
     return Expanded(
       child: ListView.builder(
         controller: listViewController,
-        itemCount: (searchResultModel?.itemList.length ?? 0) * 2,
+        itemCount: getItemListSize() * 2,
         padding: const EdgeInsets.all(16.0),
         itemBuilder: (context, i) {
           //如果是奇数则返回一个分割线
@@ -77,12 +81,18 @@ class _HomePageState extends State<HomePage> {
           // 比如 i 为：1, 2, 3, 4, 5 时，结果为 0, 1, 1, 2, 2，
           // 这个可以计算出 ListView 中减去分隔线后的实际的位置。
           final index = i ~/ 2;
-          print("list index: $index");
+          if (index >= getItemListSize()-1) {
+            loadMore();
+          }
+          print("list index: $index getItemListSize ${getItemListSize()}");
           return _buildItem(context, index);
         },
       ),
     );
   }
+
+  /// Item Size
+  int getItemListSize() => (searchResultModel?.itemList.length ?? 0);
 
   /// 构建列表的 Item
   _buildItem(BuildContext context, int index) {
@@ -164,7 +174,7 @@ class _HomePageState extends State<HomePage> {
       ToastUtils.showToast("请输入搜索关键字");
     } else {
       this.searchKey = searchKey;
-      Api.requestSearchResult(searchKey).then((value) {
+      Api.requestSearchResult(searchKey, 1).then((value) {
         print(
             "数据回调: ${value?.timeConsuming} size: ${value?.itemList.length}");
         setState(() {
@@ -180,5 +190,29 @@ class _HomePageState extends State<HomePage> {
         });
       });
     }
+  }
+
+  /// 加载更多
+  void loadMore() {
+    if (_isLoadMore) {
+      return;
+    }
+    _isLoadMore = true;
+    this.searchKey = searchKey;
+    startIndex++;
+    Api.requestSearchResult(searchKey, startIndex).then((value) {
+      _isLoadMore = false;
+      print("数据回调: ${value?.timeConsuming} size: ${value?.itemList.length}");
+      if (value == null) {
+        return;
+      }
+      setState(() {
+        searchResultModel?.itemList.addAll(value.itemList);
+        searchTextController.text = searchKey;
+        searchTextController.selection = TextSelection(
+            baseOffset: searchKey.length,
+            extentOffset: searchKey.length);
+      });
+    });
   }
 }

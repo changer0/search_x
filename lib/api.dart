@@ -5,12 +5,12 @@ import 'package:search_x/search_result_model.dart';
 
 class Api {
   /// 请求搜索结果
-  static Future<SearchResultModel?> requestSearchResult(String searchKey) {
+  static Future<SearchResultModel?> requestSearchResult(String searchKey, int startIndex) {
     return Future<SearchResultModel>(() async {
       String result = "";
       try {
         var response = await Dio()
-            .get("https://service-cr7xtm88-1256519379.hk.apigw.tencentcs.com/release/search_proxy?q=" + searchKey);
+            .get("https://service-cr7xtm88-1256519379.hk.apigw.tencentcs.com/release/search_proxy?q=$searchKey&start=$startIndex");
         result = response.data.toString();
       } catch (e) {
         print(e);
