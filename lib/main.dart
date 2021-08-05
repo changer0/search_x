@@ -108,13 +108,13 @@ class _HomePageState extends State<HomePage> {
   /// 搜索框
   _buildSearchBox(BuildContext context) {
     return Container(
-        margin: EdgeInsets.fromLTRB(10, 0, 10, 30),
+        margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
         decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(20)),
             border:
                 Border.all(color: Theme.of(context).primaryColor, width: 2)),
         child: Padding(
-          padding: EdgeInsets.fromLTRB(10, 5, 5, 5),
+          padding: EdgeInsets.fromLTRB(20, 0, 5, 0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -124,6 +124,9 @@ class _HomePageState extends State<HomePage> {
                 focusNode: focusNode,
                 textInputAction: TextInputAction.search,
                 controller: searchTextController,
+                onSubmitted: (value){
+                  goSearch();
+                },
                 decoration: InputDecoration(
                     hintText: "输入要搜索的文字", border: InputBorder.none),
                 maxLines: 1,
@@ -132,29 +135,7 @@ class _HomePageState extends State<HomePage> {
                 padding: EdgeInsets.all(1),
                 child: TextButton(
                   onPressed: () {
-                    String searchKey = searchTextController.text;
-                    focusNode.unfocus();
-                    ToastUtils.showToast("正在搜索, 请稍候...");
-                    if (searchKey.isEmpty) {
-                      ToastUtils.showToast("请输入搜索关键字");
-                    } else {
-                      this.searchKey = searchKey;
-                      Api.requestSearchResult(searchKey).then((value) {
-                        print(
-                            "数据回调: ${value?.timeConsuming} size: ${value?.itemList.length}");
-                        setState(() {
-
-                          searchResultModel = value;
-                          listViewController.animateTo(0,
-                              duration: Duration(milliseconds: 100),
-                              curve: Curves.bounceIn);
-                          searchTextController.text = searchKey;
-                          searchTextController.selection = TextSelection(
-                              baseOffset: searchKey.length,
-                              extentOffset: searchKey.length);
-                        });
-                      });
-                    }
+                    goSearch();
 
                     //打印测试
                     // Future<String>(() {
@@ -172,5 +153,32 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ));
+  }
+
+  /// 触发搜索
+  void goSearch() {
+    String searchKey = searchTextController.text;
+    focusNode.unfocus();
+    ToastUtils.showToast("正在搜索, 请稍候...");
+    if (searchKey.isEmpty) {
+      ToastUtils.showToast("请输入搜索关键字");
+    } else {
+      this.searchKey = searchKey;
+      Api.requestSearchResult(searchKey).then((value) {
+        print(
+            "数据回调: ${value?.timeConsuming} size: ${value?.itemList.length}");
+        setState(() {
+    
+          searchResultModel = value;
+          listViewController.animateTo(0,
+              duration: Duration(milliseconds: 100),
+              curve: Curves.bounceIn);
+          searchTextController.text = searchKey;
+          searchTextController.selection = TextSelection(
+              baseOffset: searchKey.length,
+              extentOffset: searchKey.length);
+        });
+      });
+    }
   }
 }
