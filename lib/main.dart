@@ -81,7 +81,7 @@ class _HomePageState extends State<HomePage> {
           // 比如 i 为：1, 2, 3, 4, 5 时，结果为 0, 1, 1, 2, 2，
           // 这个可以计算出 ListView 中减去分隔线后的实际的位置。
           final index = i ~/ 2;
-          if (index >= getItemListSize()-1) {
+          if (index >= getItemListSize() - 1) {
             loadMore();
           }
           print("list index: $index getItemListSize ${getItemListSize()}");
@@ -134,13 +134,28 @@ class _HomePageState extends State<HomePage> {
                 focusNode: focusNode,
                 textInputAction: TextInputAction.search,
                 controller: searchTextController,
-                onSubmitted: (value){
+                onSubmitted: (value) {
                   goSearch();
                 },
                 decoration: InputDecoration(
                     hintText: "输入要搜索的文字", border: InputBorder.none),
                 maxLines: 1,
               )),
+              GestureDetector(
+                child: Icon(
+                  Icons.close_outlined,
+                  color: Theme.of(context).hintColor,
+                ),
+                onTap: (){
+                  print("执行按钮");
+                  setState(() {
+                    searchKey = "";
+                    searchTextController.text = "";
+                    searchResultModel = null;
+                    _isLoadMore = false;
+                  });
+                },
+              ),
               Padding(
                 padding: EdgeInsets.all(1),
                 child: TextButton(
@@ -176,18 +191,14 @@ class _HomePageState extends State<HomePage> {
     } else {
       this.searchKey = searchKey;
       Api.requestSearchResult(searchKey, startIndex).then((value) {
-        print(
-            "数据回调: ${value?.timeConsuming} size: ${value?.itemList.length}");
+        print("数据回调: ${value?.timeConsuming} size: ${value?.itemList.length}");
         setState(() {
-    
           searchResultModel = value;
           listViewController.animateTo(0,
-              duration: Duration(milliseconds: 100),
-              curve: Curves.bounceIn);
+              duration: Duration(milliseconds: 100), curve: Curves.bounceIn);
           searchTextController.text = searchKey;
           searchTextController.selection = TextSelection(
-              baseOffset: searchKey.length,
-              extentOffset: searchKey.length);
+              baseOffset: searchKey.length, extentOffset: searchKey.length);
         });
       });
     }
@@ -195,6 +206,7 @@ class _HomePageState extends State<HomePage> {
 
   /// 加载更多
   void loadMore() {
+    print("loadMore: $_isLoadMore");
     if (_isLoadMore) {
       return;
     }
@@ -211,8 +223,7 @@ class _HomePageState extends State<HomePage> {
         searchResultModel?.itemList.addAll(value.itemList);
         searchTextController.text = searchKey;
         searchTextController.selection = TextSelection(
-            baseOffset: searchKey.length,
-            extentOffset: searchKey.length);
+            baseOffset: searchKey.length, extentOffset: searchKey.length);
       });
     });
   }
