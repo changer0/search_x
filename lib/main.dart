@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:search_x/search_result_model.dart';
 import 'package:search_x/toast_utils.dart';
