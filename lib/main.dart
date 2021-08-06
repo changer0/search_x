@@ -51,20 +51,31 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
+        // appBar: AppBar(
+        //   title: Text(widget.title),
+        // ),
         body: _buildBody(context));
   }
 
   /// 构建一个搜索框
   _buildBody(BuildContext context) {
-    return Column(
-      children: [
-        _buildSearchResult(context),
-        _buildSearchBox(context),
-      ],
-    );
+    final Size size = MediaQuery.of(context).size;
+    if (size.height > size.width) {
+      return Column(
+        children: [
+          _buildSearchResult(context),
+          _buildSearchBox(context),
+        ],
+      );
+    } else {
+      return Column(
+        children: [
+          _buildSearchBox(context),
+          _buildSearchResult(context),
+        ],
+      );
+    }
+
   }
 
   /// 搜索结果
@@ -118,7 +129,7 @@ class _HomePageState extends State<HomePage> {
   /// 搜索框
   _buildSearchBox(BuildContext context) {
     return Container(
-        margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
+        margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
         decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(20)),
             border:
