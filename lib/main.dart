@@ -53,6 +53,16 @@ class _HomePageState extends State<HomePage> {
   String _centerTipString = "";
 
   @override
+  void initState() {
+    String q = Uri.base.queryParameters['q'] ?? "";
+    if (q.isNotEmpty == true) {
+      searchTextController.text = q;
+      goSearch();
+    }
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         // appBar: AppBar(
