@@ -1,12 +1,20 @@
 
-class SearchResultModel {
+import 'base_model.dart';
+
+class SearchResultModel with BaseModel {
   /// 耗时
   String timeConsuming = "";
   /// 列表
   List<ItemModel> itemList = [];
 
-
   SearchResultModel({required this.timeConsuming, required this.itemList});
+
+  factory SearchResultModel.newInstance(bool isSuccess, String errorMsg) {
+    SearchResultModel model = SearchResultModel(timeConsuming: "", itemList: []);
+    model.isSuccess = isSuccess;
+    model.errorMsg = errorMsg;
+    return model;
+  }
 
   factory SearchResultModel.from(Map<String, dynamic> parsedJson) {
     print("SearchResultModel.from called");

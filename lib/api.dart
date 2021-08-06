@@ -9,15 +9,20 @@ class Api {
     print("requestSearchResult | searchKey: $searchKey startIndex: $startIndex");
     return Future<SearchResultModel>(() async {
       String result = "";
+      SearchResultModel model = SearchResultModel.newInstance(false, "");
       try {
-        var response = await Dio()
-            .get("https://service-cr7xtm88-1256519379.hk.apigw.tencentcs.com/release/search_proxy?q=$searchKey&start=$startIndex");
+        String url = "https://service-cr7xtm88-1256519379.hk.apigw.tencentcs.com/release/search_proxy?q=$searchKey&start=$startIndex";
+        print("requestSearchResult | url: $url");
+        var response = await Dio().get(url);
         result = response.data.toString();
+        model = SearchResultModel.from(json.decode(result));
+        model.isSuccess = true;
       } catch (e) {
         print(e);
+        model.errorMsg = e.toString();
       }
-      print("打印结果: $result");
-      return SearchResultModel.from(json.decode(result));
+      print("requestSearchResult | result: $result");
+      return model;
     });
 
   }

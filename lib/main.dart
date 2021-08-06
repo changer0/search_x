@@ -44,9 +44,13 @@ class _HomePageState extends State<HomePage> {
 
   FocusNode focusNode = FocusNode();
 
-  int startIndex = 0;
+  int _startIndex = 0;
 
+  /// 正在 LoadMore
   bool _isLoadMore = false;
+
+  /// 中间提示
+  String _centerTipString = "";
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +61,7 @@ class _HomePageState extends State<HomePage> {
         body: _buildBody(context));
   }
 
-  /// 构建一个搜索框
+  /// 构建整个内容
   _buildBody(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     if (size.height > size.width) {
@@ -75,11 +79,19 @@ class _HomePageState extends State<HomePage> {
         ],
       );
     }
-
   }
 
   /// 搜索结果
   _buildSearchResult(BuildContext context) {
+    if (_centerTipString.isNotEmpty) {
+      return Expanded(
+        child: Center(
+          child: Text(
+            _centerTipString,
+          ),
+        ),
+      );
+    }
     return Expanded(
       child: ListView.builder(
         controller: listViewController,
@@ -157,8 +169,8 @@ class _HomePageState extends State<HomePage> {
                   Icons.close_outlined,
                   color: Theme.of(context).hintColor,
                 ),
-                onTap: (){
-                  print("执行按钮");
+                onTap: () {
+                  print("清除屏幕");
                   setState(() {
                     searchKey = "";
                     searchTextController.text = "";
@@ -195,21 +207,28 @@ class _HomePageState extends State<HomePage> {
   void goSearch() {
     String searchKey = searchTextController.text;
     focusNode.unfocus();
-    ToastUtils.showToast("正在搜索, 请稍候...");
-    startIndex = 0;
+    _startIndex = 0;
     if (searchKey.isEmpty) {
       ToastUtils.showToast("请输入搜索关键字");
     } else {
+      setState(() {
+        _centerTipString = "正在搜索, 请稍候...";
+      });
       this.searchKey = searchKey;
-      Api.requestSearchResult(searchKey, startIndex).then((value) {
+      Api.requestSearchResult(searchKey, _startIndex).then((value) {
         print("数据回调: ${value?.timeConsuming} size: ${value?.itemList.length}");
         setState(() {
-          searchResultModel = value;
-          listViewController.animateTo(0,
-              duration: Duration(milliseconds: 100), curve: Curves.bounceIn);
-          searchTextController.text = searchKey;
-          searchTextController.selection = TextSelection(
-              baseOffset: searchKey.length, extentOffset: searchKey.length);
+          if (value?.isSuccess == true) {
+            _centerTipString = "";
+            searchResultModel = value;
+            listViewController.animateTo(0,
+                duration: Duration(milliseconds: 100), curve: Curves.bounceIn);
+            searchTextController.text = searchKey;
+            searchTextController.selection = TextSelection(
+                baseOffset: searchKey.length, extentOffset: searchKey.length);
+          } else {
+            _centerTipString = "加载失败: ${value?.errorMsg}";
+          }
         });
       });
     }
@@ -223,8 +242,8 @@ class _HomePageState extends State<HomePage> {
     }
     _isLoadMore = true;
     this.searchKey = searchKey;
-    startIndex = getItemListSize() + 1;
-    Api.requestSearchResult(searchKey, startIndex).then((value) {
+    _startIndex = getItemListSize() + 1;
+    Api.requestSearchResult(searchKey, _startIndex).then((value) {
       _isLoadMore = false;
       print("数据回调: ${value?.timeConsuming} size: ${value?.itemList.length}");
       if (value == null) {
