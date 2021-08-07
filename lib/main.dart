@@ -34,20 +34,29 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  /// Model
   SearchResultModel? searchResultModel;
 
+  /// ListViewController
   ScrollController listViewController = ScrollController();
 
+  /// 当前搜索关键字
   String searchKey = "";
 
+  /// 输入框控制器
   TextEditingController searchTextController = TextEditingController();
 
+  /// 焦点
   FocusNode focusNode = FocusNode();
 
+  /// 搜索其实 Index
   int _startIndex = 0;
 
   /// 正在 LoadMore
-  bool _isLoadMore = false;
+  bool _isLoadingMore = false;
+  
+  /// 加载更多完成
+  bool _isLoadMoreEnd = false;
 
   /// 中间提示
   String _centerTipString = "";
@@ -185,13 +194,24 @@ class _HomePageState extends State<HomePage> {
                     searchKey = "";
                     searchTextController.text = "";
                     searchResultModel = null;
-                    _isLoadMore = false;
+                    _isLoadingMore = false;
                   });
                 },
               ),
               Padding(
                 padding: EdgeInsets.all(1),
                 child: TextButton(
+                  style: ButtonStyle(
+                    // 水波纹颜色
+                    overlayColor: MaterialStateProperty.resolveWith((states){
+                      //设置按下时的背景颜色
+                      if(states.contains(MaterialState.pressed)) {
+                        return Theme.of(context).buttonColor;
+                      }
+                      //默认不使用背景颜色
+                      return null;
+                    }),
+                  ),
                   onPressed: () {
                     goSearch();
 
@@ -204,7 +224,8 @@ class _HomePageState extends State<HomePage> {
                   },
                   child: Text(
                     "搜索",
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(
+                        fontSize: 16, color: Theme.of(context).primaryColor),
                   ),
                 ),
               )
@@ -246,17 +267,18 @@ class _HomePageState extends State<HomePage> {
 
   /// 加载更多
   void loadMore() {
-    print("loadMore: $_isLoadMore");
-    if (_isLoadMore) {
+    print("_isLoadingMore: $_isLoadingMore _isLoadMoreEnd: $_isLoadMoreEnd");
+    if (_isLoadingMore || _isLoadMoreEnd) {
       return;
     }
-    _isLoadMore = true;
+    _isLoadingMore = true;
     this.searchKey = searchKey;
     _startIndex = getItemListSize() + 1;
     Api.requestSearchResult(searchKey, _startIndex).then((value) {
-      _isLoadMore = false;
+      _isLoadingMore = false;
       print("数据回调: ${value?.timeConsuming} size: ${value?.itemList.length}");
-      if (value == null) {
+      if (value == null || value.isSuccess != true || value.itemList.length <= 0) {
+        _isLoadMoreEnd = true;
         return;
       }
       setState(() {
