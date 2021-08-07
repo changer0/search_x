@@ -189,7 +189,7 @@ class _HomePageState extends State<HomePage> {
                   goSearch();
                 },
                 decoration: InputDecoration(
-                    hintText: "输入要搜索的文字", border: InputBorder.none),
+                    hintText: "输入要搜索的关键字", border: InputBorder.none),
                 maxLines: 1,
               )),
               GestureDetector(
@@ -246,11 +246,11 @@ class _HomePageState extends State<HomePage> {
   /// 触发搜索
   void goSearch() {
     String searchKey = searchTextController.text;
-    focusNode.unfocus();
     _startIndex = 0;
     if (searchKey.isEmpty) {
       ToastUtils.showToast("请输入搜索关键字");
     } else {
+      focusNode.unfocus();
       setState(() {
         _centerTipString = "正在搜索, 请稍候...";
       });

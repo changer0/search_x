@@ -5,7 +5,7 @@ class ToastUtils {
   static showToast(String msg) {
     Fluttertoast.showToast(
       msg: msg,
-      gravity: ToastGravity.CENTER
+      gravity: ToastGravity.BOTTOM
     );
   }
 }
