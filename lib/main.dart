@@ -253,8 +253,6 @@ class _HomePageState extends State<HomePage> {
           if (value?.isSuccess == true) {
             _centerTipString = "";
             searchResultModel = value;
-            listViewController.animateTo(0,
-                duration: Duration(milliseconds: 100), curve: Curves.bounceIn);
             searchTextController.text = searchKey;
             searchTextController.selection = TextSelection(
                 baseOffset: searchKey.length, extentOffset: searchKey.length);
