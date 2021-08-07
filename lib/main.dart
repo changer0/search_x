@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:search_x/devices_utils.dart';
 import 'package:search_x/search_result_model.dart';
 import 'package:search_x/toast_utils.dart';
 import 'package:search_x/url_launch.dart';
@@ -17,7 +18,7 @@ class SearchXApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Search X",
-      theme: SearchXThemeConfig.blue,
+      theme: ThemeConfig.blue,
       home: HomePage(
         title: "Search X",
       ),
@@ -55,7 +56,7 @@ class _HomePageState extends State<HomePage> {
 
   /// 正在 LoadMore
   bool _isLoadingMore = false;
-  
+
   /// 加载更多完成
   bool _isLoadMoreEnd = false;
 
@@ -69,16 +70,22 @@ class _HomePageState extends State<HomePage> {
       searchTextController.text = q;
       goSearch();
     }
+    // 获取焦点 不可放在这儿
+    //FocusScope.of(context).requestFocus(focusNode);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        // appBar: AppBar(
-        //   title: Text(widget.title),
-        // ),
-        body: _buildBody(context));
+    return Scaffold(appBar: _getAppBar(), body: _buildBody(context));
+  }
+
+  _getAppBar() {
+    if (DevicesUtils.isWeb() != true) {
+      return AppBar(
+        title: Text(widget.title),
+      );
+    }
   }
 
   /// 构建整个内容
@@ -174,6 +181,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               Expanded(
                   child: TextField(
+                autofocus: true,
                 focusNode: focusNode,
                 textInputAction: TextInputAction.search,
                 controller: searchTextController,
@@ -204,9 +212,9 @@ class _HomePageState extends State<HomePage> {
                 child: TextButton(
                   style: ButtonStyle(
                     // 水波纹颜色
-                    overlayColor: MaterialStateProperty.resolveWith((states){
+                    overlayColor: MaterialStateProperty.resolveWith((states) {
                       //设置按下时的背景颜色
-                      if(states.contains(MaterialState.pressed)) {
+                      if (states.contains(MaterialState.pressed)) {
                         return Theme.of(context).buttonColor;
                       }
                       //默认不使用背景颜色
@@ -276,7 +284,9 @@ class _HomePageState extends State<HomePage> {
     Api.requestSearchResult(searchKey, _startIndex).then((value) {
       _isLoadingMore = false;
       print("数据回调: ${value?.timeConsuming} size: ${value?.itemList.length}");
-      if (value == null || value.isSuccess != true || value.itemList.length <= 0) {
+      if (value == null ||
+          value.isSuccess != true ||
+          value.itemList.length <= 0) {
         _isLoadMoreEnd = true;
         return;
       }
