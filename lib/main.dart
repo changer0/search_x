@@ -3,6 +3,7 @@ import 'package:search_x/search_result_model.dart';
 import 'package:search_x/toast_utils.dart';
 import 'package:search_x/url_launch.dart';
 
+import 'ThemeConfig.dart';
 import 'api.dart';
 
 void main() {
@@ -16,7 +17,7 @@ class SearchXApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Search X",
-      theme: ThemeData(primaryColor: Colors.blue),
+      theme: SearchXThemeConfig.blue,
       home: HomePage(
         title: "Search X",
       ),
