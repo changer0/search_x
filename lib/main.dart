@@ -269,7 +269,7 @@ class _HomePageState extends State<HomePage> {
   _buildConfigPage() {
     return Expanded(
       child: Container(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
         alignment: Alignment.bottomLeft,
         child: _buildSearchHistory(),
       ),
@@ -308,6 +308,7 @@ class _HomePageState extends State<HomePage> {
               maxLines: 1,
               style: TextStyle(color: Theme.of(context).cardColor),
               textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis, //省略号
             ),
             onPressed: () {
               //SearchHistoryUtil.clearHistory();
