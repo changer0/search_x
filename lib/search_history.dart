@@ -90,7 +90,7 @@ class SearchHistoryUtil {
     return json.encode(encodeList);
   }
 
-  static Future<List<SearchHistoryEntity>> getHistory()async{
+  static Future<List<SearchHistoryEntity>> getHistory() async {
     String? str = await getHistoryStr();
     return Future((){
       List<SearchHistoryEntity> list = [];
@@ -107,6 +107,14 @@ class SearchHistoryUtil {
 
   static Future clearHistory() {
     return SpUtil.setSearchHistory("");
+  }
+
+  static Future delHistory(SearchHistoryEntity entity) async {
+    List<SearchHistoryEntity> list = await SearchHistoryUtil.getHistory();
+    return Future((){
+      list.remove(entity);
+      SpUtil.setSearchHistory(encodeHistoryList(list));
+    });
   }
 }
 
@@ -139,6 +147,14 @@ class SearchHistoryHelper {
   Future clearHistory() {
     return SearchHistoryUtil.clearHistory().then((value){
       searchHistoryList.clear();
+    });
+  }
+
+  Future delHistory(SearchHistoryEntity entity) {
+    return Future((){
+      SearchHistoryUtil.delHistory(entity).then((value) {
+        searchHistoryList.remove(entity);
+      });
     });
   }
 }

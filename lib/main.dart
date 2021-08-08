@@ -74,12 +74,11 @@ class _HomePageState extends State<HomePage> {
       searchTextController.text = q;
       goSearch();
     }
-    searchHistoryHelper.initHistoryList().then((value) => setState((){}));
+    searchHistoryHelper.initHistoryList().then((value) => setState(() {}));
     // 获取焦点 不可放在这儿
     //FocusScope.of(context).requestFocus(focusNode);
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -280,14 +279,21 @@ class _HomePageState extends State<HomePage> {
       //居右
       crossAxisAlignment: CrossAxisAlignment.start,
       //居底
-      mainAxisAlignment: DevicesUtil.isPortrait(context) ? MainAxisAlignment.end : MainAxisAlignment.start,
+      mainAxisAlignment: DevicesUtil.isPortrait(context)
+          ? MainAxisAlignment.end
+          : MainAxisAlignment.start,
       children: [
         Container(
           alignment: Alignment.centerRight,
           child: IconButton(
-            icon: Icon(Icons.delete, color: Theme.of(context).accentColor,),
+            icon: Icon(
+              Icons.delete,
+              color: Theme.of(context).accentColor,
+            ),
             onPressed: () {
-              searchHistoryHelper.clearHistory().then((value) => setState((){}));
+              searchHistoryHelper
+                  .clearHistory()
+                  .then((value) => setState(() {}));
             },
           ),
         ),
@@ -301,75 +307,100 @@ class _HomePageState extends State<HomePage> {
     List<Widget> _children = [];
     for (SearchHistoryEntity e in searchHistoryHelper.searchHistoryList) {
       _children.add(Container(
-        child: TextButton(
-            child: Text(
-              e.title,
-              maxLines: 1,
-              style: TextStyle(color: Theme.of(context).cardColor),
-              textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis, //省略号
-            ),
-            onPressed: () {
-              //SearchHistoryUtil.clearHistory();
-              searchTextController.text = e.title;
-              goSearch();
-            },
-          style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.resolveWith((state) {
-                print("backgroundColor: state: $state ${state.runtimeType}");
-                return Theme.of(context).primaryColor;
-              }),
-              //水波纹
-              overlayColor:  MaterialStateProperty.all(Theme.of(context).backgroundColor),
+          child: Chip(
+        label: GestureDetector(
+          child: Text(
+            e.title,
+            maxLines: 1,
+            style: TextStyle(color: Theme.of(context).cardColor),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis, //省略号
           ),
+          onTap: () {
+            //SearchHistoryUtil.clearHistory();
+            searchTextController.text = e.title;
+            goSearch();
+          },
         ),
-      )
-
-          //这是一种实现方式
-        // GestureDetector(
-        //   child: Container (
-        //     constraints: BoxConstraints(
-        //       minHeight: 30
-        //     ),
-        //     child: Padding(
-        //       padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
-        //       // 恶心🤮🤮🤮
-        //       // https://blog.csdn.net/shving/article/details/107744954
-        //       child: Row(
-        //         mainAxisSize: MainAxisSize.min,
-        //         children: [
-        //           Text(
-        //             e.title,
-        //             maxLines: 1,
-        //             style: TextStyle(
-        //                 color: Theme.of(context).cardColor
-        //             ),
-        //             textAlign: TextAlign.center,
-        //           ),
-        //         ],
-        //       ),
-        //     ),
-        //     decoration: BoxDecoration(
-        //       color: Theme.of(context).backgroundColor,
-        //       borderRadius: BorderRadius.all(Radius.circular(8))
-        //     ),
-        //   ),
-        //   onTap:() {
-        //     //SearchHistoryUtil.clearHistory();
-        //     searchTextController.text = e.title;
-        //     goSearch();
-        //   }
-        // )
-      );
+        onDeleted: () {
+          print("_buildSearchHistoryWrap | remove $e");
+          searchHistoryHelper.delHistory(e).then((value) => setState((){}));
+        },
+        backgroundColor: Theme.of(context).primaryColor,
+        deleteIcon: Icon(
+          Icons.cancel,
+          color: Colors.white,
+        ),
+      )));
+      //这是第二种实现方式
+      //TextButton(
+      //             child: Text(
+      //               e.title,
+      //               maxLines: 1,
+      //               style: TextStyle(color: Theme.of(context).cardColor),
+      //               textAlign: TextAlign.center,
+      //                 overflow: TextOverflow.ellipsis, //省略号
+      //             ),
+      //             onPressed: () {
+      //               //SearchHistoryUtil.clearHistory();
+      //               searchTextController.text = e.title;
+      //               goSearch();
+      //             },
+      //           style: ButtonStyle(
+      //               backgroundColor: MaterialStateProperty.resolveWith((state) {
+      //                 print("backgroundColor: state: $state ${state.runtimeType}");
+      //                 return Theme.of(context).primaryColor;
+      //               }),
+      //               //水波纹
+      //               overlayColor:  MaterialStateProperty.all(Theme.of(context).backgroundColor),
+      //           ),
+      //         ),
+      //这是一种实现方式
+      // GestureDetector(
+      //   child: Container (
+      //     constraints: BoxConstraints(
+      //       minHeight: 30
+      //     ),
+      //     child: Padding(
+      //       padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
+      //       // 恶心🤮🤮🤮
+      //       // https://blog.csdn.net/shving/article/details/107744954
+      //       child: Row(
+      //         mainAxisSize: MainAxisSize.min,
+      //         children: [
+      //           Text(
+      //             e.title,
+      //             maxLines: 1,
+      //             style: TextStyle(
+      //                 color: Theme.of(context).cardColor
+      //             ),
+      //             textAlign: TextAlign.center,
+      //           ),
+      //         ],
+      //       ),
+      //     ),
+      //     decoration: BoxDecoration(
+      //       color: Theme.of(context).backgroundColor,
+      //       borderRadius: BorderRadius.all(Radius.circular(8))
+      //     ),
+      //   ),
+      //   onTap:() {
+      //     //SearchHistoryUtil.clearHistory();
+      //     searchTextController.text = e.title;
+      //     goSearch();
+      //   }
+      // )
     }
     return Wrap(
-        spacing: 8.0,// 主轴(水平)方向间距
-        runSpacing: 0.0, //  纵轴（垂直）方向间距
-        alignment: WrapAlignment.start,//居左
-        crossAxisAlignment: WrapCrossAlignment.start,
-        children: _children,
-      );
-
+      spacing: 8.0,
+      // 主轴(水平)方向间距
+      runSpacing: 0.0,
+      //  纵轴（垂直）方向间距
+      alignment: WrapAlignment.start,
+      //居左
+      crossAxisAlignment: WrapCrossAlignment.start,
+      children: _children,
+    );
   }
 
   /// 触发搜索
@@ -381,13 +412,16 @@ class _HomePageState extends State<HomePage> {
     } else {
       focusNode.unfocus();
       //添加搜索历史
-      searchHistoryHelper.addHistory(SearchHistoryEntity(searchKey)).then((value) => setState((){}));
+      searchHistoryHelper
+          .addHistory(SearchHistoryEntity(searchKey))
+          .then((value) => setState(() {}));
       setState(() {
         _centerTipString = "正在搜索, 请稍候...";
       });
       this.searchKey = searchKey;
       Api.requestSearchResult(searchKey, _startIndex).then((value) {
-        print("goSearch requestSearchResult callback: ${value?.timeConsuming} size: ${value?.itemList.length}");
+        print(
+            "goSearch requestSearchResult callback: ${value?.timeConsuming} size: ${value?.itemList.length}");
         setState(() {
           if (value?.isSuccess == true) {
             _centerTipString = "";
@@ -414,7 +448,8 @@ class _HomePageState extends State<HomePage> {
     _startIndex = getItemListSize() + 1;
     Api.requestSearchResult(searchKey, _startIndex).then((value) {
       _isLoadingMore = false;
-      print("loadMore requestSearchResult callback: ${value?.timeConsuming} size: ${value?.itemList.length}");
+      print(
+          "loadMore requestSearchResult callback: ${value?.timeConsuming} size: ${value?.itemList.length}");
       if (value == null ||
           value.isSuccess != true ||
           value.itemList.length <= 0) {
