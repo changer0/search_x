@@ -286,7 +286,7 @@ class _HomePageState extends State<HomePage> {
         Container(
           alignment: Alignment.centerRight,
           child: IconButton(
-            icon: Icon(Icons.delete),
+            icon: Icon(Icons.delete, color: Theme.of(context).accentColor,),
             onPressed: () {
               searchHistoryHelper.clearHistory().then((value) => setState((){}));
             },
@@ -301,38 +301,71 @@ class _HomePageState extends State<HomePage> {
   _buildSearchHistoryWrap() {
     List<Widget> _children = [];
     for (SearchHistoryEntity e in searchHistoryHelper.searchHistoryList) {
-      _children.add(
-        GestureDetector(
-          child: Container (
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
-              child: Text(
-                  e.title,
-                style: TextStyle(
-                  color: Theme.of(context).cardColor,
-                  height: 1.2
-                ),
-                textAlign: TextAlign.center,
-              ),
+      _children.add(Container(
+        child: TextButton(
+            child: Text(
+              e.title,
+              maxLines: 1,
+              style: TextStyle(color: Theme.of(context).cardColor),
+              textAlign: TextAlign.center,
             ),
-            decoration: BoxDecoration(
-              color: Theme.of(context).backgroundColor,
-              borderRadius: BorderRadius.all(Radius.circular(8))
-            ),
+            onPressed: () {
+              //SearchHistoryUtil.clearHistory();
+              searchTextController.text = e.title;
+              goSearch();
+            },
+          style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.resolveWith((state) {
+                print("backgroundColor: state: $state ${state.runtimeType}");
+                return Theme.of(context).primaryColor;
+              }),
+              //水波纹
+              overlayColor:  MaterialStateProperty.all(Theme.of(context).backgroundColor),
           ),
-          onTap:() {
-            //SearchHistoryUtil.clearHistory();
-            searchTextController.text = e.title;
-            goSearch();
-          }
-        )
-      );
+        ),
+      )
 
+          //这是一种实现方式
+        // GestureDetector(
+        //   child: Container (
+        //     constraints: BoxConstraints(
+        //       minHeight: 30
+        //     ),
+        //     child: Padding(
+        //       padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
+        //       // 恶心🤮🤮🤮
+        //       // https://blog.csdn.net/shving/article/details/107744954
+        //       child: Row(
+        //         mainAxisSize: MainAxisSize.min,
+        //         children: [
+        //           Text(
+        //             e.title,
+        //             maxLines: 1,
+        //             style: TextStyle(
+        //                 color: Theme.of(context).cardColor
+        //             ),
+        //             textAlign: TextAlign.center,
+        //           ),
+        //         ],
+        //       ),
+        //     ),
+        //     decoration: BoxDecoration(
+        //       color: Theme.of(context).backgroundColor,
+        //       borderRadius: BorderRadius.all(Radius.circular(8))
+        //     ),
+        //   ),
+        //   onTap:() {
+        //     //SearchHistoryUtil.clearHistory();
+        //     searchTextController.text = e.title;
+        //     goSearch();
+        //   }
+        // )
+      );
     }
     return Wrap(
         spacing: 8.0,// 主轴(水平)方向间距
-        runSpacing: 8.0, //  纵轴（垂直）方向间距
-        alignment: WrapAlignment.start,
+        runSpacing: 0.0, //  纵轴（垂直）方向间距
+        alignment: WrapAlignment.start,//居左
         crossAxisAlignment: WrapCrossAlignment.start,
         children: _children,
       );
