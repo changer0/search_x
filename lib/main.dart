@@ -5,7 +5,7 @@ import 'package:search_x/search_result_model.dart';
 import 'package:search_x/toast_util.dart';
 import 'package:search_x/url_launch.dart';
 
-import 'ThemeConfig.dart';
+import 'theme_config.dart';
 import 'api.dart';
 
 void main() {
@@ -96,8 +96,7 @@ class _HomePageState extends State<HomePage> {
 
   /// 构建整个内容
   _buildBody(BuildContext context) {
-    final Size size = MediaQuery.of(context).size;
-    if (size.height > size.width) {
+    if (DevicesUtil.isPortrait(context)) {
       return Column(
         children: [
           _buildSearchResult(context),
@@ -182,7 +181,7 @@ class _HomePageState extends State<HomePage> {
     return Container(
         margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
         decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(20)),
+            borderRadius: BorderRadius.all(Radius.circular(12)),
             border:
                 Border.all(color: Theme.of(context).primaryColor, width: 2)),
         child: Padding(
@@ -281,7 +280,7 @@ class _HomePageState extends State<HomePage> {
       //居右
       crossAxisAlignment: CrossAxisAlignment.start,
       //居底
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: DevicesUtil.isPortrait(context) ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
         Container(
           alignment: Alignment.centerRight,
