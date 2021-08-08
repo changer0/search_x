@@ -37,20 +37,29 @@ class SearchHistoryEntity {
 }
 
 class SearchHistoryUtil {
-  static Future addHistory(SearchHistoryEntity entity) {
-    return Future(() async {
+  static Future<List<SearchHistoryEntity>?> addHistory(SearchHistoryEntity entity) {
+    return Future<List<SearchHistoryEntity>?>(() async {
       String? value = await SearchHistoryUtil.getHistoryStr();
       print("SearchHistoryUtil 从 sp 中读取: $value");
       List<SearchHistoryEntity> list = [];
       if (value != null) {
         List<SearchHistoryEntity>? _list = decodeHistoryList(value);
-        if (_list != null) list.addAll(_list);
+        if (_list != null) {
+          if (_list.contains(entity)) {
+            _list.remove(entity);
+          }
+          list.addAll(_list);
+        }
       }
-      list.add(entity);
+      if (list.length >= 10) {
+        list.removeRange(9, list.length);
+      }
+      list.insert(0, entity);
       //注意应使用 jsonEncode 进行 json 转义
       String saveStr = encodeHistoryList(list);
       print("saveStr: $saveStr");
-      return SpUtil.setSearchHistory(saveStr);
+      await SpUtil.setSearchHistory(saveStr);
+      return list;
     });
   }
 
@@ -120,7 +129,11 @@ class SearchHistoryHelper {
   }
 
   Future addHistory(SearchHistoryEntity searchHistoryEntity) {
-    return SearchHistoryUtil.addHistory(searchHistoryEntity).then((value) => searchHistoryList.add(searchHistoryEntity));
+    return SearchHistoryUtil.addHistory(searchHistoryEntity).then((value) {
+      if (value == null) return;
+      searchHistoryList.clear();
+      searchHistoryList.addAll(value);
+    });
   }
 
   Future clearHistory() {
