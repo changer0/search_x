@@ -9,7 +9,7 @@ class Api {
     print("requestSearchResult | searchKey: $searchKey startIndex: $startIndex");
     return Future<SearchResultModel>(() async {
       String result = "";
-      SearchResultModel model = SearchResultModel.newInstance(false, "");
+      SearchResultModel model = SearchResultModel.createByLocal(false, "");
       try {
         String url = "https://service-cr7xtm88-1256519379.hk.apigw.tencentcs.com/release/search_proxy?q=$searchKey&start=$startIndex";
         print("requestSearchResult | url: $url");

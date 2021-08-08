@@ -9,11 +9,9 @@ class SearchResultModel with BaseModel {
 
   SearchResultModel({required this.timeConsuming, required this.itemList});
 
-  factory SearchResultModel.newInstance(bool isSuccess, String errorMsg) {
-    SearchResultModel model = SearchResultModel(timeConsuming: "", itemList: []);
-    model.isSuccess = isSuccess;
-    model.errorMsg = errorMsg;
-    return model;
+  SearchResultModel.createByLocal(bool isSuccess, String errorMsg) {
+    this.isSuccess = isSuccess;
+    this.errorMsg = errorMsg;
   }
 
   factory SearchResultModel.from(Map<String, dynamic> parsedJson) {

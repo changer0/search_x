@@ -1,7 +1,7 @@
 
 import 'package:fluttertoast/fluttertoast.dart';
 
-class ToastUtils {
+class ToastUtil {
   static showToast(String msg) {
     Fluttertoast.showToast(
       msg: msg,

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 /// 设备工具类
-class DevicesUtils {
+class DevicesUtil {
   static bool isWeb() {
     return kIsWeb == true;
   }

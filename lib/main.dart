@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:search_x/devices_utils.dart';
+import 'package:search_x/devices_util.dart';
+import 'package:search_x/search_history.dart';
 import 'package:search_x/search_result_model.dart';
-import 'package:search_x/toast_utils.dart';
+import 'package:search_x/toast_util.dart';
 import 'package:search_x/url_launch.dart';
 
 import 'ThemeConfig.dart';
@@ -63,6 +64,9 @@ class _HomePageState extends State<HomePage> {
   /// 中间提示
   String _centerTipString = "";
 
+  /// 搜索历史辅助类
+  SearchHistoryHelper searchHistoryHelper = SearchHistoryHelper();
+
   @override
   void initState() {
     String q = Uri.base.queryParameters['q'] ?? "";
@@ -70,10 +74,12 @@ class _HomePageState extends State<HomePage> {
       searchTextController.text = q;
       goSearch();
     }
+    searchHistoryHelper.initHistoryList().then((value) => setState((){}));
     // 获取焦点 不可放在这儿
     //FocusScope.of(context).requestFocus(focusNode);
     super.initState();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +87,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _getAppBar() {
-    if (DevicesUtils.isWeb() != true) {
+    if (DevicesUtil.isWeb() != true) {
       return AppBar(
         title: Text(widget.title),
       );
@@ -119,6 +125,12 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     }
+
+    if (getItemListSize() <= 0 && searchHistoryHelper.length() > 0) {
+      //listView 可展示内容为空,那就展示配置页面
+      return _buildConfigPage();
+    }
+
     return Expanded(
       child: ListView.builder(
         controller: listViewController,
@@ -134,7 +146,7 @@ class _HomePageState extends State<HomePage> {
           if (index >= getItemListSize() - 1) {
             loadMore();
           }
-          print("list index: $index getItemListSize ${getItemListSize()}");
+          //print("list index: $index getItemListSize ${getItemListSize()}");
           return _buildItem(context, index);
         },
       ),
@@ -192,14 +204,31 @@ class _HomePageState extends State<HomePage> {
                     hintText: "输入要搜索的关键字", border: InputBorder.none),
                 maxLines: 1,
               )),
-              GestureDetector(
-                child: Icon(
-                  Icons.close_outlined,
-                  color: Theme.of(context).hintColor,
-                ),
-                onTap: () {
-                  print("清除屏幕");
+              // InkWell(
+              //     child: Padding(
+              //       padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+              //       child: Icon(
+              //         Icons.close_outlined,
+              //         color: Theme.of(context).hintColor,
+              //       ),
+              //     ),
+              //     onTap: () {
+              //       print("clear screen");
+              //       setState(() {
+              //         _centerTipString = "";
+              //         searchKey = "";
+              //         searchTextController.text = "";
+              //         searchResultModel = null;
+              //         _isLoadingMore = false;
+              //       });
+              //     }),
+              IconButton(
+                icon: Icon(Icons.close_outlined),
+                color: Theme.of(context).hintColor,
+                onPressed: () {
+                  print("clear screen");
                   setState(() {
+                    _centerTipString = "";
                     searchKey = "";
                     searchTextController.text = "";
                     searchResultModel = null;
@@ -223,13 +252,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                   onPressed: () {
                     goSearch();
-
-                    //打印测试
-                    // Future<String>(() {
-                    //   return "hh";
-                    // }).then((value) {
-                    //   print("哎哟我天" + value);
-                    // });
                   },
                   child: Text(
                     "搜索",
@@ -243,20 +265,96 @@ class _HomePageState extends State<HomePage> {
         ));
   }
 
+  /// 构建配置页面 目前只有搜索历史
+  _buildConfigPage() {
+    return Expanded(
+      child: Container(
+        padding: EdgeInsets.all(16.0),
+        alignment: Alignment.bottomLeft,
+        child: _buildSearchHistory(),
+      ),
+    );
+  }
+
+  _buildSearchHistory() {
+    return Column(
+      //居右
+      crossAxisAlignment: CrossAxisAlignment.start,
+      //居底
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Container(
+          alignment: Alignment.centerRight,
+          child: IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () {
+              searchHistoryHelper.clearHistory().then((value) => setState((){}));
+            },
+          ),
+        ),
+        _buildSearchHistoryWrap(),
+      ],
+    );
+  }
+
+  /// 构建搜索历史的瀑布布局
+  _buildSearchHistoryWrap() {
+    List<Widget> _children = [];
+    for (SearchHistoryEntity e in searchHistoryHelper.searchHistoryList) {
+      _children.add(
+        GestureDetector(
+          child: Container (
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+              child: Text(
+                  e.title,
+                style: TextStyle(
+                  color: Theme.of(context).cardColor,
+                  height: 1.2
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            decoration: BoxDecoration(
+              color: Theme.of(context).backgroundColor,
+              borderRadius: BorderRadius.all(Radius.circular(8))
+            ),
+          ),
+          onTap:() {
+            //SearchHistoryUtil.clearHistory();
+            searchTextController.text = e.title;
+            goSearch();
+          }
+        )
+      );
+
+    }
+    return Wrap(
+        spacing: 8.0,// 主轴(水平)方向间距
+        runSpacing: 8.0, //  纵轴（垂直）方向间距
+        alignment: WrapAlignment.start,
+        crossAxisAlignment: WrapCrossAlignment.start,
+        children: _children,
+      );
+
+  }
+
   /// 触发搜索
   void goSearch() {
     String searchKey = searchTextController.text;
     _startIndex = 0;
     if (searchKey.isEmpty) {
-      ToastUtils.showToast("请输入搜索关键字");
+      ToastUtil.showToast("请输入搜索关键字");
     } else {
       focusNode.unfocus();
+      //添加搜索历史
+      searchHistoryHelper.addHistory(SearchHistoryEntity(searchKey)).then((value) => setState((){}));
       setState(() {
         _centerTipString = "正在搜索, 请稍候...";
       });
       this.searchKey = searchKey;
       Api.requestSearchResult(searchKey, _startIndex).then((value) {
-        print("数据回调: ${value?.timeConsuming} size: ${value?.itemList.length}");
+        print("goSearch requestSearchResult callback: ${value?.timeConsuming} size: ${value?.itemList.length}");
         setState(() {
           if (value?.isSuccess == true) {
             _centerTipString = "";
@@ -283,7 +381,7 @@ class _HomePageState extends State<HomePage> {
     _startIndex = getItemListSize() + 1;
     Api.requestSearchResult(searchKey, _startIndex).then((value) {
       _isLoadingMore = false;
-      print("数据回调: ${value?.timeConsuming} size: ${value?.itemList.length}");
+      print("loadMore requestSearchResult callback: ${value?.timeConsuming} size: ${value?.itemList.length}");
       if (value == null ||
           value.isSuccess != true ||
           value.itemList.length <= 0) {
