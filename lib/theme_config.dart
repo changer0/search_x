@@ -35,6 +35,44 @@ class SearchXThemeData {
       primaryTextColor.hashCode;
 }
 
+/// 使用 Widget 之间的传递,需要通过一个 StatefulWidget 进行传递
+class SearchXThemeWidget extends StatefulWidget {
+  final Widget child;
+  const SearchXThemeWidget({Key? key,required this.child}) : super(key: key);
+
+  @override
+  _SearchXThemeWidgetState createState() => _SearchXThemeWidgetState(child);
+}
+
+class _SearchXThemeWidgetState extends State<SearchXThemeWidget> {
+  SearchXThemeData curThemeData = ThemeConfig.black;
+  final Widget child;
+
+  _SearchXThemeWidgetState(this.child);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      child: SearchXTheme(
+        child: child,
+        data: curThemeData,
+      ),
+      onTap: (){
+        print("_SearchXThemeWidgetState click");
+        setState(() {
+          if (curThemeData == ThemeConfig.black) {
+            curThemeData = ThemeConfig.blue;
+          } else {
+            curThemeData = ThemeConfig.black;
+          }
+
+        });
+      },
+    );
+  }
+}
+
+
 class SearchXTheme extends InheritedWidget{
   
   final SearchXThemeData data;
@@ -62,15 +100,18 @@ class SearchXTheme extends InheritedWidget{
 
 
 class ThemeConfig {
-  static SearchXThemeData blue = SearchXThemeData(
-    //   primaryColor: Colors.blue[500],
-    //   accentColor: Colors.red[200],
-    //   buttonBgColor: Colors.blue[100],
-    // primaryTextColor: Colors.white,
+  static SearchXThemeData black = SearchXThemeData(
     primaryColor: Colors.black,
     accentColor: Colors.black,
     buttonBgColor: Colors.black,
     primaryTextColor: Colors.white,
+  );
+
+  static SearchXThemeData blue = SearchXThemeData(
+      primaryColor: Colors.blue[500],
+      accentColor: Colors.red[200],
+      buttonBgColor: Colors.blue[100],
+    primaryTextColor: Colors.white
   );
 }
 

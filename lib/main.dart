@@ -19,9 +19,11 @@ class SearchXApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Search X",
-      home: HomePage(
-        title: "Search X",
-      ),
+      home: SearchXThemeWidget(
+        child: HomePage(
+          title: "Search X",
+        ),
+      )
     );
   }
 }
@@ -82,17 +84,20 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: _getAppBar(),
-        body: SearchXTheme(
-          child: _buildBody(context),
-          data: ThemeConfig.blue,
-        ));
+        appBar: _getAppBar(context),
+        body:_buildBody(context),
+    );
   }
 
-  _getAppBar() {
+  _getAppBar(BuildContext context) {
     if (DevicesUtil.isWeb() != true) {
       return AppBar(
-        title: Text(widget.title),
+        title: Text(
+          widget.title,
+          style: TextStyle(color: SearchXTheme.of(context).primaryTextColor),
+        ),
+        backgroundColor: SearchXTheme.of(context).primaryColor,
+        brightness: Brightness.dark,
       );
     }
   }
