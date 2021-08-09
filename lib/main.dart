@@ -19,10 +19,11 @@ class SearchXApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Search X",
-      theme: ThemeConfig.blue,
-      home: HomePage(
-        title: "Search X",
-      ),
+      home: SearchXThemeWidget(
+        child: HomePage(
+          title: "Search X",
+        ),
+      )
     );
   }
 }
@@ -82,13 +83,21 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: _getAppBar(), body: _buildBody(context));
+    return Scaffold(
+        appBar: _getAppBar(context),
+        body:_buildBody(context),
+    );
   }
 
-  _getAppBar() {
+  _getAppBar(BuildContext context) {
     if (DevicesUtil.isWeb() != true) {
       return AppBar(
-        title: Text(widget.title),
+        title: Text(
+          widget.title,
+          style: TextStyle(color: SearchXTheme.of(context).primaryTextColor),
+        ),
+        backgroundColor: SearchXTheme.of(context).primaryColor,
+        brightness: Brightness.dark,
       );
     }
   }
@@ -182,7 +191,7 @@ class _HomePageState extends State<HomePage> {
         decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(12)),
             border:
-                Border.all(color: Theme.of(context).primaryColor, width: 2)),
+                Border.all(color: SearchXTheme.of(context).primaryColor??Colors.blue, width: 2)),
         child: Padding(
           padding: EdgeInsets.fromLTRB(20, 0, 5, 0),
           child: Row(
@@ -207,7 +216,7 @@ class _HomePageState extends State<HomePage> {
               //       padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
               //       child: Icon(
               //         Icons.close_outlined,
-              //         color: Theme.of(context).hintColor,
+              //         color: SearchXTheme.of(context).hintColor,
               //       ),
               //     ),
               //     onTap: () {
@@ -222,7 +231,7 @@ class _HomePageState extends State<HomePage> {
               //     }),
               IconButton(
                 icon: Icon(Icons.close_outlined),
-                color: Theme.of(context).hintColor,
+                color: SearchXTheme.of(context).hintColor,
                 onPressed: () {
                   print("clear screen");
                   setState(() {
@@ -242,7 +251,7 @@ class _HomePageState extends State<HomePage> {
                     overlayColor: MaterialStateProperty.resolveWith((states) {
                       //设置按下时的背景颜色
                       if (states.contains(MaterialState.pressed)) {
-                        return Theme.of(context).buttonColor;
+                        return SearchXTheme.of(context).buttonBgColor;
                       }
                       //默认不使用背景颜色
                       return null;
@@ -254,7 +263,7 @@ class _HomePageState extends State<HomePage> {
                   child: Text(
                     "搜索",
                     style: TextStyle(
-                        fontSize: 16, color: Theme.of(context).primaryColor),
+                        fontSize: 16, color: SearchXTheme.of(context).primaryColor),
                   ),
                 ),
               )
@@ -288,7 +297,7 @@ class _HomePageState extends State<HomePage> {
           child: IconButton(
             icon: Icon(
               Icons.delete,
-              color: Theme.of(context).accentColor,
+              color: SearchXTheme.of(context).accentColor,
             ),
             onPressed: () {
               searchHistoryHelper
@@ -312,7 +321,7 @@ class _HomePageState extends State<HomePage> {
           child: Text(
             e.title,
             maxLines: 1,
-            style: TextStyle(color: Theme.of(context).cardColor),
+            style: TextStyle(color: SearchXTheme.of(context).primaryTextColor),
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis, //省略号
           ),
@@ -326,7 +335,7 @@ class _HomePageState extends State<HomePage> {
           print("_buildSearchHistoryWrap | remove $e");
           searchHistoryHelper.delHistory(e).then((value) => setState((){}));
         },
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: SearchXTheme.of(context).primaryColor,
         deleteIcon: Icon(
           Icons.cancel,
           color: Colors.white,
@@ -337,7 +346,7 @@ class _HomePageState extends State<HomePage> {
       //             child: Text(
       //               e.title,
       //               maxLines: 1,
-      //               style: TextStyle(color: Theme.of(context).cardColor),
+      //               style: TextStyle(color: SearchXTheme.of(context).cardColor),
       //               textAlign: TextAlign.center,
       //                 overflow: TextOverflow.ellipsis, //省略号
       //             ),
@@ -349,10 +358,10 @@ class _HomePageState extends State<HomePage> {
       //           style: ButtonStyle(
       //               backgroundColor: MaterialStateProperty.resolveWith((state) {
       //                 print("backgroundColor: state: $state ${state.runtimeType}");
-      //                 return Theme.of(context).primaryColor;
+      //                 return SearchXTheme.of(context).primaryColor;
       //               }),
       //               //水波纹
-      //               overlayColor:  MaterialStateProperty.all(Theme.of(context).backgroundColor),
+      //               overlayColor:  MaterialStateProperty.all(SearchXTheme.of(context).backgroundColor),
       //           ),
       //         ),
       //这是一种实现方式
@@ -372,7 +381,7 @@ class _HomePageState extends State<HomePage> {
       //             e.title,
       //             maxLines: 1,
       //             style: TextStyle(
-      //                 color: Theme.of(context).cardColor
+      //                 color: SearchXTheme.of(context).cardColor
       //             ),
       //             textAlign: TextAlign.center,
       //           ),
@@ -380,7 +389,7 @@ class _HomePageState extends State<HomePage> {
       //       ),
       //     ),
       //     decoration: BoxDecoration(
-      //       color: Theme.of(context).backgroundColor,
+      //       color: SearchXTheme.of(context).backgroundColor,
       //       borderRadius: BorderRadius.all(Radius.circular(8))
       //     ),
       //   ),
