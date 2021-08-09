@@ -429,6 +429,7 @@ class _HomePageState extends State<HomePage> {
             searchTextController.text = searchKey;
             searchTextController.selection = TextSelection(
                 baseOffset: searchKey.length, extentOffset: searchKey.length);
+            _isLoadMoreEnd = false;
           } else {
             _centerTipString = "加载失败: ${value?.errorMsg}";
           }
