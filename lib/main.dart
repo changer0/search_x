@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:search_x/devices_util.dart';
 import 'package:search_x/search_history.dart';
 import 'package:search_x/search_result_model.dart';
+import 'package:search_x/sp_util.dart';
 import 'package:search_x/toast_util.dart';
 import 'package:search_x/url_launch.dart';
 
@@ -133,9 +134,9 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    if (getItemListSize() <= 0 && searchHistoryHelper.length() > 0) {
+    if (getItemListSize() <= 0) {
       //listView 可展示内容为空,那就展示配置页面
-      return _buildConfigPage();
+      return _buildConfigPage(context);
     }
 
     return Expanded(
@@ -191,7 +192,7 @@ class _HomePageState extends State<HomePage> {
         decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(12)),
             border:
-                Border.all(color: SearchXTheme.of(context).primaryColor??Colors.blue, width: 2)),
+                Border.all(color: SearchXTheme.of(context).primaryColor, width: 2)),
         child: Padding(
           padding: EdgeInsets.fromLTRB(20, 0, 5, 0),
           child: Row(
@@ -211,24 +212,6 @@ class _HomePageState extends State<HomePage> {
                     hintText: "输入要搜索的关键字", border: InputBorder.none),
                 maxLines: 1,
               )),
-              // InkWell(
-              //     child: Padding(
-              //       padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
-              //       child: Icon(
-              //         Icons.close_outlined,
-              //         color: SearchXTheme.of(context).hintColor,
-              //       ),
-              //     ),
-              //     onTap: () {
-              //       print("clear screen");
-              //       setState(() {
-              //         _centerTipString = "";
-              //         searchKey = "";
-              //         searchTextController.text = "";
-              //         searchResultModel = null;
-              //         _isLoadingMore = false;
-              //       });
-              //     }),
               IconButton(
                 icon: Icon(Icons.close_outlined),
                 color: SearchXTheme.of(context).hintColor,
@@ -251,7 +234,7 @@ class _HomePageState extends State<HomePage> {
                     overlayColor: MaterialStateProperty.resolveWith((states) {
                       //设置按下时的背景颜色
                       if (states.contains(MaterialState.pressed)) {
-                        return SearchXTheme.of(context).buttonBgColor;
+                        return SearchXTheme.of(context).buttonPressColor;
                       }
                       //默认不使用背景颜色
                       return null;
@@ -273,16 +256,97 @@ class _HomePageState extends State<HomePage> {
   }
 
   /// 构建配置页面 目前只有搜索历史
-  _buildConfigPage() {
+  _buildConfigPage(BuildContext context) {
+    List<Widget> children = [];
+    if (DevicesUtil.isPortrait(context)) {
+      children.add(_buildSettingEntrance());
+      children.add(
+          Expanded(child: Container(),)
+      );
+      //搜索历史
+      if (searchHistoryHelper.length() > 0) {
+        children.add(_buildSearchHistory());
+      }
+    } else {
+      //搜索历史
+      if (searchHistoryHelper.length() > 0) {
+        children.add(_buildSearchHistory());
+      }
+      children.add(
+          Expanded(child: Container(),)
+      );
+      children.add(_buildSettingEntrance());
+    }
+
+
+
     return Expanded(
       child: Container(
         padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
         alignment: Alignment.bottomLeft,
-        child: _buildSearchHistory(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: children,
+        ),
       ),
     );
   }
 
+  /// 设置按钮入口
+  _buildSettingEntrance() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        IconButton(icon: Icon(Icons.color_lens, color: SearchXTheme.of(context).primaryColor,), onPressed: (){
+          _showThemeDialog(context);
+        })
+      ],
+    );
+  }
+  _showThemeDialog(BuildContext context) async {
+    int? i = await showDialog<int>(
+      context: context,
+      builder: (BuildContext context) {
+       return SimpleDialog(
+         title: Text("请选择主题"),
+         children: [
+           SimpleDialogOption(
+             onPressed: (){
+               Navigator.pop(context, 1);
+             },
+             child: Text("黑色"),
+           ),
+           SimpleDialogOption(
+             onPressed: (){
+               Navigator.pop(context, 2);
+             },
+             child: Text("蓝色"),
+           ),
+         ],
+       );
+      }
+    );
+    if (i != null){
+      switch(i) {
+        case 1: {
+          _changeTheme(context, ThemeConfig.BLACK);
+          break;
+        }
+        case 2: {
+          _changeTheme(context, ThemeConfig.BLUE);
+          break;
+        }
+      }
+    }
+
+  }
+
+  _changeTheme(BuildContext context, String key) async{
+    await SpUtil.setSearchXTheme(key);
+    ThemeNotification(ThemeConfig.get(key)).dispatch(context);
+  }
+
+  /// 搜索历史
   _buildSearchHistory() {
     return Column(
       //居右
@@ -341,64 +405,6 @@ class _HomePageState extends State<HomePage> {
           color: Colors.white,
         ),
       )));
-      //这是第二种实现方式
-      //TextButton(
-      //             child: Text(
-      //               e.title,
-      //               maxLines: 1,
-      //               style: TextStyle(color: SearchXTheme.of(context).cardColor),
-      //               textAlign: TextAlign.center,
-      //                 overflow: TextOverflow.ellipsis, //省略号
-      //             ),
-      //             onPressed: () {
-      //               //SearchHistoryUtil.clearHistory();
-      //               searchTextController.text = e.title;
-      //               goSearch();
-      //             },
-      //           style: ButtonStyle(
-      //               backgroundColor: MaterialStateProperty.resolveWith((state) {
-      //                 print("backgroundColor: state: $state ${state.runtimeType}");
-      //                 return SearchXTheme.of(context).primaryColor;
-      //               }),
-      //               //水波纹
-      //               overlayColor:  MaterialStateProperty.all(SearchXTheme.of(context).backgroundColor),
-      //           ),
-      //         ),
-      //这是一种实现方式
-      // GestureDetector(
-      //   child: Container (
-      //     constraints: BoxConstraints(
-      //       minHeight: 30
-      //     ),
-      //     child: Padding(
-      //       padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
-      //       // 恶心🤮🤮🤮
-      //       // https://blog.csdn.net/shving/article/details/107744954
-      //       child: Row(
-      //         mainAxisSize: MainAxisSize.min,
-      //         children: [
-      //           Text(
-      //             e.title,
-      //             maxLines: 1,
-      //             style: TextStyle(
-      //                 color: SearchXTheme.of(context).cardColor
-      //             ),
-      //             textAlign: TextAlign.center,
-      //           ),
-      //         ],
-      //       ),
-      //     ),
-      //     decoration: BoxDecoration(
-      //       color: SearchXTheme.of(context).backgroundColor,
-      //       borderRadius: BorderRadius.all(Radius.circular(8))
-      //     ),
-      //   ),
-      //   onTap:() {
-      //     //SearchHistoryUtil.clearHistory();
-      //     searchTextController.text = e.title;
-      //     goSearch();
-      //   }
-      // )
     }
     return Wrap(
       spacing: 8.0,

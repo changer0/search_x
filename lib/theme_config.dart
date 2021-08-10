@@ -1,19 +1,19 @@
-
 import 'package:flutter/material.dart';
+import 'package:search_x/sp_util.dart';
 
 class SearchXThemeData {
-  Color? primaryColor;
-  Color? accentColor;
-  Color? buttonBgColor;
-  Color? hintColor;
-  Color? primaryTextColor;
+  Color primaryColor;
+  Color accentColor;
+  Color buttonPressColor;
+  Color hintColor;
+  Color primaryTextColor;
 
   SearchXThemeData(
-      {this.primaryColor,
-      this.accentColor,
-      this.buttonBgColor,
-      this.hintColor,
-      this.primaryTextColor});
+      {this.primaryColor = Colors.black,
+      this.accentColor = Colors.black,
+      this.buttonPressColor = Colors.grey,
+      this.hintColor = Colors.black,
+      this.primaryTextColor = Colors.white});
 
   @override
   bool operator ==(Object other) =>
@@ -22,7 +22,7 @@ class SearchXThemeData {
           runtimeType == other.runtimeType &&
           primaryColor == other.primaryColor &&
           accentColor == other.accentColor &&
-          buttonBgColor == other.buttonBgColor &&
+          buttonPressColor == other.buttonPressColor &&
           hintColor == other.hintColor &&
           primaryTextColor == other.primaryTextColor;
 
@@ -30,48 +30,59 @@ class SearchXThemeData {
   int get hashCode =>
       primaryColor.hashCode ^
       accentColor.hashCode ^
-      buttonBgColor.hashCode ^
+      buttonPressColor.hashCode ^
       hintColor.hashCode ^
       primaryTextColor.hashCode;
+}
+
+class ThemeNotification extends Notification {
+  ThemeNotification(this.msg);
+  final SearchXThemeData msg;
 }
 
 /// 使用 Widget 之间的传递,需要通过一个 StatefulWidget 进行传递
 class SearchXThemeWidget extends StatefulWidget {
   final Widget child;
-  const SearchXThemeWidget({Key? key,required this.child}) : super(key: key);
+  const SearchXThemeWidget({Key? key, required this.child}) : super(key: key);
 
   @override
   _SearchXThemeWidgetState createState() => _SearchXThemeWidgetState(child);
 }
 
 class _SearchXThemeWidgetState extends State<SearchXThemeWidget> {
-  SearchXThemeData curThemeData = ThemeConfig.black;
+  SearchXThemeData curThemeData = ThemeConfig.defaultTheme;
   final Widget child;
-
   _SearchXThemeWidgetState(this.child);
 
   @override
+  void initState() {
+    SpUtil.getSearchXTheme().then((value) {
+      setState(() {
+        print("change Theme: $value");
+        curThemeData = ThemeConfig.get(value);
+      });
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+
+    return NotificationListener<ThemeNotification>(
+      onNotification: (notification) {
+        print("NotificationListener | 收到通知");
+        setState(() {
+          curThemeData = notification.msg;
+        });
+        return true;
+      },
       child: SearchXTheme(
         child: child,
         data: curThemeData,
       ),
-      onTap: (){
-        print("_SearchXThemeWidgetState click");
-        setState(() {
-          if (curThemeData == ThemeConfig.black) {
-            curThemeData = ThemeConfig.blue;
-          } else {
-            curThemeData = ThemeConfig.black;
-          }
-
-        });
-      },
     );
   }
 }
-
 
 class SearchXTheme extends InheritedWidget{
   
@@ -81,37 +92,42 @@ class SearchXTheme extends InheritedWidget{
 
   // 方便其子 Widget 在 Widget 树中找到它
   static SearchXThemeData of(BuildContext context) {
-      SearchXTheme? theme = context.dependOnInheritedWidgetOfExactType<SearchXTheme>();
-      print("SearchXThemeData | of theme: $theme ");
-      return theme?.data ?? SearchXThemeData(
-          primaryColor: Colors.red,
-          accentColor: Colors.red,
-          buttonBgColor: Colors.red
-      );
+    SearchXTheme? theme =
+        context.dependOnInheritedWidgetOfExactType<SearchXTheme>();
+    //print("SearchXThemeData | of theme: $theme ");
+    return theme?.data ?? SearchXThemeData();
   }
 
   @override
   bool updateShouldNotify(covariant SearchXTheme oldWidget) {
     bool needUpdate = (data != oldWidget.data);
-    print("SearchXTheme | updateShouldNotify | needUpdate:$needUpdate");
+    //print("SearchXTheme | updateShouldNotify | needUpdate:$needUpdate");
     return needUpdate;
   }
 }
 
-
 class ThemeConfig {
-  static SearchXThemeData black = SearchXThemeData(
-    primaryColor: Colors.black,
-    accentColor: Colors.black,
-    buttonBgColor: Colors.black,
-    primaryTextColor: Colors.white,
-  );
+  static const String BLACK = "black";
+  static const String BLUE = "blue";
 
-  static SearchXThemeData blue = SearchXThemeData(
-      primaryColor: Colors.blue[500],
-      accentColor: Colors.red[200],
-      buttonBgColor: Colors.blue[100],
-    primaryTextColor: Colors.white
-  );
+  static SearchXThemeData defaultTheme = SearchXThemeData(
+      primaryColor: Colors.blue[500] ?? Colors.blue,
+      accentColor: Colors.red[200] ?? Colors.red,
+      buttonPressColor: Colors.blue[100] ?? Colors.blue,
+      primaryTextColor: Colors.white);
+
+  static Map<String, SearchXThemeData> themeMap = {
+    BLACK: SearchXThemeData(
+      primaryColor: Colors.black,
+      accentColor: Colors.black,
+      buttonPressColor: Colors.grey,
+      primaryTextColor: Colors.white,
+    ),
+    BLUE: defaultTheme,
+  };
+
+  static SearchXThemeData get(String? key) {
+    String _key = key ?? BLUE;
+    return themeMap[_key] ?? defaultTheme;
+  }
 }
-
