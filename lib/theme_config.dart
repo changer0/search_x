@@ -12,7 +12,7 @@ class SearchXThemeData {
       {this.primaryColor = Colors.red,
       this.accentColor = Colors.red,
       this.buttonPressColor = Colors.red,
-      this.hintColor = Colors.red,
+      this.hintColor = Colors.grey,
       this.primaryTitleTextColor = Colors.white});
 
   @override
@@ -109,6 +109,7 @@ class SearchXTheme extends InheritedWidget{
 class ThemeConfig {
   static const String BLACK = "black";
   static const String BLUE = "blue";
+  static const String RED = "red";
 
   static SearchXThemeData defaultTheme = SearchXThemeData(
       primaryColor: Colors.blue[500] ?? Colors.blue,
@@ -117,6 +118,12 @@ class ThemeConfig {
       primaryTitleTextColor: Colors.white);
 
   static Map<String, SearchXThemeData> themeMap = {
+    RED: SearchXThemeData(
+      primaryColor: Colors.red,
+      accentColor: Colors.red,
+      buttonPressColor: Colors.red[50]??Colors.red,
+      primaryTitleTextColor: Colors.white,
+    ),
     BLACK: SearchXThemeData(
       primaryColor: Colors.black,
       accentColor: Colors.black,

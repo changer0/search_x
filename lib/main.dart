@@ -138,7 +138,7 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     }
-    
+
     if (getItemListSize() <= 0) {
       //listView 可展示内容为空,那就展示配置页面
       return _buildConfigPage(context);
@@ -330,13 +330,19 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () {
                   Navigator.pop(context, 1);
                 },
-                child: Text("黑色"),
+                child: Text("炫酷黑"),
               ),
               SimpleDialogOption(
                 onPressed: () {
                   Navigator.pop(context, 2);
                 },
-                child: Text("蓝色"),
+                child: Text("通用蓝"),
+              ),
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.pop(context, 3);
+                },
+                child: Text("中国红"),
               ),
             ],
           );
@@ -351,6 +357,11 @@ class _HomePageState extends State<HomePage> {
         case 2:
           {
             _changeTheme(context, ThemeConfig.BLUE);
+            break;
+          }
+        case 3:
+          {
+            _changeTheme(context, ThemeConfig.RED);
             break;
           }
       }
@@ -401,7 +412,8 @@ class _HomePageState extends State<HomePage> {
           child: Text(
             e.title,
             maxLines: 1,
-            style: TextStyle(color: SearchXTheme.of(context).primaryTitleTextColor),
+            style: TextStyle(
+                color: SearchXTheme.of(context).primaryTitleTextColor),
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis, //省略号
           ),
