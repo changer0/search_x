@@ -5,7 +5,9 @@ import 'package:search_x/search_result_model.dart';
 import 'package:search_x/sp_util.dart';
 import 'package:search_x/toast_util.dart';
 import 'package:search_x/url_launch.dart';
+import 'package:search_x/web_view.dart';
 
+import 'common_util.dart';
 import 'theme_config.dart';
 import 'api.dart';
 
@@ -19,13 +21,17 @@ class SearchXApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Search X",
-      home: SearchXThemeWidget(
-        child: HomePage(
-          title: "Search X",
-        ),
-      )
-    );
+        routes: {
+          "web_view": (context) {
+            return SearchXThemeWidget(child: SearchXWebView());
+          },
+        },
+        title: "Search X",
+        home: SearchXThemeWidget(
+          child: HomePage(
+            title: "Search X",
+          ),
+        ));
   }
 }
 
@@ -66,6 +72,8 @@ class _HomePageState extends State<HomePage> {
   /// 中间提示
   String _centerTipString = "";
 
+  bool _isSearching = false;
+
   /// 搜索历史辅助类
   SearchHistoryHelper searchHistoryHelper = SearchHistoryHelper();
 
@@ -85,22 +93,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: _getAppBar(context),
-        body:_buildBody(context),
+      appBar: CommonUtil.buildAppBar(context, widget.title),
+      body: _buildBody(context),
     );
-  }
-
-  _getAppBar(BuildContext context) {
-    if (DevicesUtil.isWeb() != true) {
-      return AppBar(
-        title: Text(
-          widget.title,
-          style: TextStyle(color: SearchXTheme.of(context).primaryTextColor),
-        ),
-        backgroundColor: SearchXTheme.of(context).primaryColor,
-        brightness: Brightness.dark,
-      );
-    }
   }
 
   /// 构建整个内容
@@ -129,6 +124,16 @@ class _HomePageState extends State<HomePage> {
         child: Center(
           child: Text(
             _centerTipString,
+          ),
+        ),
+      );
+    }
+
+    if (_isSearching) {
+      return Expanded(
+        child: Center(
+          child: CircularProgressIndicator(
+            color: SearchXTheme.of(context).primaryColor,
           ),
         ),
       );
@@ -177,8 +182,13 @@ class _HomePageState extends State<HomePage> {
     ItemModel itemModel = itemList[index];
     return ListTile(
       onTap: () {
-        print("将要跳转到: ${itemModel.url}");
-        URLLauncher.launchURL(itemModel.url);
+        print("jump to: ${itemModel.url}");
+        if (DevicesUtil.isWeb()) {
+          URLLauncher.launchURL(itemModel.url);
+        } else {
+          Navigator.of(context).pushNamed("web_view",
+              arguments: {'url': itemModel.url, 'title': itemModel.title});
+        }
       },
       title: Text(itemModel.title),
       subtitle: Text(itemModel.description),
@@ -191,8 +201,8 @@ class _HomePageState extends State<HomePage> {
         margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
         decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(12)),
-            border:
-                Border.all(color: SearchXTheme.of(context).primaryColor, width: 2)),
+            border: Border.all(
+                color: SearchXTheme.of(context).primaryColor, width: 2)),
         child: Padding(
           padding: EdgeInsets.fromLTRB(20, 0, 5, 0),
           child: Row(
@@ -214,11 +224,12 @@ class _HomePageState extends State<HomePage> {
               )),
               IconButton(
                 icon: Icon(Icons.close_outlined),
-                color: SearchXTheme.of(context).hintColor,
+                color: SearchXTheme.of(context).primaryColor,
                 onPressed: () {
                   print("clear screen");
                   setState(() {
                     _centerTipString = "";
+                    _isSearching = false;
                     searchKey = "";
                     searchTextController.text = "";
                     searchResultModel = null;
@@ -246,7 +257,8 @@ class _HomePageState extends State<HomePage> {
                   child: Text(
                     "搜索",
                     style: TextStyle(
-                        fontSize: 16, color: SearchXTheme.of(context).primaryColor),
+                        fontSize: 16,
+                        color: SearchXTheme.of(context).primaryColor),
                   ),
                 ),
               )
@@ -260,9 +272,9 @@ class _HomePageState extends State<HomePage> {
     List<Widget> children = [];
     if (DevicesUtil.isPortrait(context)) {
       children.add(_buildSettingEntrance());
-      children.add(
-          Expanded(child: Container(),)
-      );
+      children.add(Expanded(
+        child: Container(),
+      ));
       //搜索历史
       if (searchHistoryHelper.length() > 0) {
         children.add(_buildSearchHistory());
@@ -272,13 +284,11 @@ class _HomePageState extends State<HomePage> {
       if (searchHistoryHelper.length() > 0) {
         children.add(_buildSearchHistory());
       }
-      children.add(
-          Expanded(child: Container(),)
-      );
+      children.add(Expanded(
+        child: Container(),
+      ));
       children.add(_buildSettingEntrance());
     }
-
-
 
     return Expanded(
       child: Container(
@@ -297,51 +307,68 @@ class _HomePageState extends State<HomePage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        IconButton(icon: Icon(Icons.color_lens, color: SearchXTheme.of(context).primaryColor,), onPressed: (){
-          _showThemeDialog(context);
-        })
+        IconButton(
+            icon: Icon(
+              Icons.color_lens,
+              color: SearchXTheme.of(context).primaryColor,
+            ),
+            onPressed: () {
+              _showThemeDialog(context);
+            })
       ],
     );
   }
+
   _showThemeDialog(BuildContext context) async {
     int? i = await showDialog<int>(
-      context: context,
-      builder: (BuildContext context) {
-       return SimpleDialog(
-         title: Text("请选择主题"),
-         children: [
-           SimpleDialogOption(
-             onPressed: (){
-               Navigator.pop(context, 1);
-             },
-             child: Text("黑色"),
-           ),
-           SimpleDialogOption(
-             onPressed: (){
-               Navigator.pop(context, 2);
-             },
-             child: Text("蓝色"),
-           ),
-         ],
-       );
-      }
-    );
-    if (i != null){
-      switch(i) {
-        case 1: {
-          _changeTheme(context, ThemeConfig.BLACK);
-          break;
-        }
-        case 2: {
-          _changeTheme(context, ThemeConfig.BLUE);
-          break;
-        }
+        context: context,
+        builder: (BuildContext context) {
+          return SimpleDialog(
+            title: Text("请选择主题"),
+            children: [
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.pop(context, 1);
+                },
+                child: Text("炫酷黑"),
+              ),
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.pop(context, 2);
+                },
+                child: Text("通用蓝"),
+              ),
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.pop(context, 3);
+                },
+                child: Text("中国红"),
+              ),
+            ],
+          );
+        });
+    if (i != null) {
+      switch (i) {
+        case 1:
+          {
+            _changeTheme(context, ThemeConfig.BLACK);
+            break;
+          }
+        case 2:
+          {
+            _changeTheme(context, ThemeConfig.BLUE);
+            break;
+          }
+        case 3:
+          {
+            _changeTheme(context, ThemeConfig.RED);
+            break;
+          }
       }
     }
-
   }
 
-  _changeTheme(BuildContext context, String key) async{
+  _changeTheme(BuildContext context, String key) async {
     await SpUtil.setSearchXTheme(key);
     ThemeNotification(ThemeConfig.get(key)).dispatch(context);
   }
@@ -385,7 +412,8 @@ class _HomePageState extends State<HomePage> {
           child: Text(
             e.title,
             maxLines: 1,
-            style: TextStyle(color: SearchXTheme.of(context).primaryTextColor),
+            style: TextStyle(
+                color: SearchXTheme.of(context).primaryTitleTextColor),
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis, //省略号
           ),
@@ -397,12 +425,12 @@ class _HomePageState extends State<HomePage> {
         ),
         onDeleted: () {
           print("_buildSearchHistoryWrap | remove $e");
-          searchHistoryHelper.delHistory(e).then((value) => setState((){}));
+          searchHistoryHelper.delHistory(e).then((value) => setState(() {}));
         },
         backgroundColor: SearchXTheme.of(context).primaryColor,
         deleteIcon: Icon(
           Icons.cancel,
-          color: Colors.white,
+          color: SearchXTheme.of(context).primaryTitleTextColor,
         ),
       )));
     }
@@ -431,13 +459,15 @@ class _HomePageState extends State<HomePage> {
           .addHistory(SearchHistoryEntity(searchKey))
           .then((value) => setState(() {}));
       setState(() {
-        _centerTipString = "正在搜索, 请稍候...";
+        _isSearching = true;
+        _centerTipString = "";
       });
       this.searchKey = searchKey;
       Api.requestSearchResult(searchKey, _startIndex).then((value) {
         print(
             "goSearch requestSearchResult callback: ${value?.timeConsuming} size: ${value?.itemList.length}");
         setState(() {
+          _isSearching = false;
           if (value?.isSuccess == true) {
             _centerTipString = "";
             searchResultModel = value;
