@@ -437,7 +437,7 @@ class _HomePageState extends State<HomePage> {
     return Wrap(
       spacing: 8.0,
       // 主轴(水平)方向间距
-      runSpacing: 0.0,
+      runSpacing: DevicesUtil.isPortrait(context) ? 0.0 : 8.0,
       //  纵轴（垂直）方向间距
       alignment: WrapAlignment.start,
       //居左
