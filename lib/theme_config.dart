@@ -6,14 +6,14 @@ class SearchXThemeData {
   Color accentColor;
   Color buttonPressColor;
   Color hintColor;
-  Color primaryTextColor;
+  Color primaryTitleTextColor;
 
   SearchXThemeData(
-      {this.primaryColor = Colors.black,
-      this.accentColor = Colors.black,
-      this.buttonPressColor = Colors.grey,
-      this.hintColor = Colors.black,
-      this.primaryTextColor = Colors.white});
+      {this.primaryColor = Colors.red,
+      this.accentColor = Colors.red,
+      this.buttonPressColor = Colors.red,
+      this.hintColor = Colors.red,
+      this.primaryTitleTextColor = Colors.white});
 
   @override
   bool operator ==(Object other) =>
@@ -24,7 +24,7 @@ class SearchXThemeData {
           accentColor == other.accentColor &&
           buttonPressColor == other.buttonPressColor &&
           hintColor == other.hintColor &&
-          primaryTextColor == other.primaryTextColor;
+          primaryTitleTextColor == other.primaryTitleTextColor;
 
   @override
   int get hashCode =>
@@ -32,7 +32,7 @@ class SearchXThemeData {
       accentColor.hashCode ^
       buttonPressColor.hashCode ^
       hintColor.hashCode ^
-      primaryTextColor.hashCode;
+      primaryTitleTextColor.hashCode;
 }
 
 class ThemeNotification extends Notification {
@@ -114,14 +114,14 @@ class ThemeConfig {
       primaryColor: Colors.blue[500] ?? Colors.blue,
       accentColor: Colors.red[200] ?? Colors.red,
       buttonPressColor: Colors.blue[100] ?? Colors.blue,
-      primaryTextColor: Colors.white);
+      primaryTitleTextColor: Colors.white);
 
   static Map<String, SearchXThemeData> themeMap = {
     BLACK: SearchXThemeData(
       primaryColor: Colors.black,
       accentColor: Colors.black,
       buttonPressColor: Colors.grey,
-      primaryTextColor: Colors.white,
+      primaryTitleTextColor: Colors.white,
     ),
     BLUE: defaultTheme,
   };
